@@ -1,0 +1,463 @@
+package MouseX::Params::Validate;
+
+use strict; use warnings;
+
+use Carp 'confess';
+use Devel::Caller 'caller_cv';
+use Scalar::Util 'blessed', 'refaddr', 'reftype';
+
+use Mouse::Util::TypeConstraints qw( find_type_constraint class_type role_type );
+use Params::Validate;
+use Sub::Exporter -setup => 
+{
+    exports => [qw( validated_hash validated_list pos_validated_list )],
+    groups  => {default => [qw( validated_hash validated_list pos_validated_list )]},
+};
+
+=head1 NAME
+
+MouseX::Params::Validate - Extension of Params::Validate using Mouse's types.
+
+=head1 VERSION
+
+Version 0.01
+
+=cut
+
+our $VERSION = '0.01';
+my %CACHED_SPECS;
+
+=head1 DESCRIPTION
+
+Method parameter validation extension to Mouse. 
+
+Borrowed code entirely from MooseX::Params::Validate and stripped Moose footprints.
+
+=head1 EXPORTS
+
+By default, this module exports the following:
+
+=over 3
+
+=item * C<validated_hash>
+
+=item * C<validated_list>
+
+=item * C<pos_validated_list>
+
+=back
+
+=head1 CAVEATS
+
+It isn't possible to introspect the method parameter specs they are created as needed when the
+method is called and cached for subsequent calls.
+
+=head1 CACHING
+
+When a validation subroutine is called the first time, the parameter spec is prepared & cached 
+to avoid unnecessary regeneration. It uses the fully qualified name of the subroutine (package 
++subname) as the cache key. In 99.999% of the use cases for this module that will be the right 
+thing to do. You can do a couple things to better control the caching behavior.
+
+=over 2
+
+=item *
+
+Passing in the C<MX_PARAMS_VALIDATE_NO_CACHE> flag in the parameter spec this will prevent the 
+parameter spec from being cached.
+
+=item *
+
+Passing in C<MX_PARAMS_VALIDATE_CACHE_KEY> with  value to be used as the cache key will bypass 
+the normal cache key generation.
+
+=back
+
+=head1 METHODS
+
+=head2 B<validated_hash(\@_, %parameter_spec)>
+
+This behaves  similarly  to the standard Params::Validate C<validate> function and returns the
+captured values in a HASH.  The  one  exception is where if it spots an instance in the C<@_>,
+then it will handle it appropriately.
+
+The values in C<@_> can either be a set of name-value pairs or a single hash reference.
+
+The C<%parameter_spec> accepts the following options:
+
+=over 4
+
+=item I<isa>
+
+The C<isa> option can be either; class name,  Mouse type constraint name or an anon Mouse type
+constraint.
+
+=item I<does>
+
+The C<does> option can be either; role name or an anon Mouse type constraint.
+
+=item I<default>
+
+This is the default value to be used if the value is not supplied.
+
+=item I<optional>
+
+As with Params::Validate, all options are considered required unless otherwise specified. This
+option is passed directly to Params::Validate.
+
+=item I<coerce>
+
+If this is true and the parameter has a type constraint which has coercions, then the coercion
+will  be  called  for  this parameter. If the type does have coercions, then this parameter is
+ignored.
+
+=back
+
+    use Mouse;
+    use MouseX::Params::Validate;
+    
+    sub foo 
+    {
+        my ($self, %params) = validated_hash(
+            \@_,
+            bar => {isa => 'Str', default => 'Mouse'},
+        );
+        ...
+        ...
+    }
+
+=cut
+
+sub validated_hash 
+{
+    my ($args, %spec) = @_;
+
+    my $cache_key = _cache_key(\%spec);
+    my $allow_extra = delete $spec{MX_PARAMS_VALIDATE_ALLOW_EXTRA};
+
+    if (exists $CACHED_SPECS{$cache_key}) 
+    {
+        (ref($CACHED_SPECS{$cache_key}) eq 'HASH')
+        || confess("I was expecting a HASH-ref in the cached $cache_key parameter"
+                 . " spec, you are doing something funky, stop it!");
+        %spec = %{$CACHED_SPECS{$cache_key}};
+    }
+    else 
+    {
+        my $should_cache = delete $spec{MX_PARAMS_VALIDATE_NO_CACHE} ? 0 : 1;
+        $spec{$_} = _convert_to_param_validate_spec( $spec{$_} )
+            foreach keys %spec;
+        $CACHED_SPECS{$cache_key} = \%spec if $should_cache;
+    }
+
+    my $instance;
+    $instance = shift @$args if blessed $args->[0];
+
+    my %args
+        = @$args == 1
+        && ref $args->[0]
+        && reftype($args->[0]) eq 'HASH' ? %{$args->[0]} : @$args;
+
+    $args{$_} = $spec{$_}{constraint}->coerce($args{$_})
+        for grep { $spec{$_}{coerce} && exists $args{$_} } keys %spec;
+
+    %args = Params::Validate::validate_with(
+        params      => \%args,
+        spec        => \%spec,
+        allow_extra => $allow_extra,
+        called      => _caller_name(),
+    );
+
+    return ((defined $instance ? $instance : ()), %args);
+}
+
+=head2 B<validated_list(\@_, %parameter_spec)>
+
+The C<%parameter_spec> accepts the same options as above but returns the params as  positional
+values instead of a HASH.
+
+We capture the order in which you defined the parameters and then return them as a list in the
+same order. If a param is marked optional and not included, then it will be set to C<undef>.
+
+The values in C<@_> can either be a set of name-value pairs or a single hash reference.
+
+Like C<validated_hash>, if it spots an object instance as the first parameter of C<@_> it will
+handle it appropriately, returning it as the first argument.
+
+    use Mouse;
+    use MouseX::Params::Validate;
+
+    sub foo 
+    {
+        my ($self, $foo, $bar) = validated_list(
+            \@_,
+            foo => {isa => 'Foo'},
+            bar => {isa => 'Bar'},
+        );
+        ...
+        ...
+    }
+
+=cut
+
+sub validated_list 
+{
+    my ($args, @spec) = @_;
+
+    my %spec = @spec;
+    my $cache_key = _cache_key(\%spec);
+    my $allow_extra = delete $spec{MX_PARAMS_VALIDATE_ALLOW_EXTRA};
+
+    my @ordered_spec;
+    if (exists $CACHED_SPECS{$cache_key}) 
+    {
+        (ref($CACHED_SPECS{$cache_key}) eq 'ARRAY')
+        || confess("I was expecting a ARRAY-ref in the cached $cache_key parameter"
+                 . " spec, you are doing something funky, stop it!");
+        %spec         = %{ $CACHED_SPECS{$cache_key}->[0] };
+        @ordered_spec = @{ $CACHED_SPECS{$cache_key}->[1] };
+    }
+    else 
+    {
+        my $should_cache = delete $spec{MX_PARAMS_VALIDATE_NO_CACHE} ? 0 : 1;
+        @ordered_spec = grep { exists $spec{$_} } @spec;
+        $spec{$_} = _convert_to_param_validate_spec($spec{$_}) foreach keys %spec;
+        $CACHED_SPECS{$cache_key} = [\%spec, \@ordered_spec] if $should_cache;
+    }
+
+    my $instance;
+    $instance = shift @$args if blessed $args->[0];
+
+    my %args
+        = @$args == 1
+        && ref $args->[0]
+        && reftype( $args->[0] ) eq 'HASH' ? %{ $args->[0] } : @$args;
+
+    $args{$_} = $spec{$_}{constraint}->coerce($args{$_})
+        for grep { $spec{$_}{coerce} && exists $args{$_} } keys %spec;
+
+    %args = Params::Validate::validate_with(
+        params      => \%args,
+        spec        => \%spec,
+        allow_extra => $allow_extra,
+        called      => _caller_name(),
+    );
+
+    return (
+        (defined $instance ? $instance : ()),
+        @args{@ordered_spec}
+    );
+}
+
+=head2 B<pos_validated_list( \@_, $spec, $spec, ... )>
+
+This function validates a list of positional parameters. Each C<$spec>  should validate one of 
+the parameters in the list.
+
+Unlike the other  functions,  this function I<cannot> find C<$self> in the argument list. Make
+sure to shift it off yourself before doing validation.
+
+The values in C<@_> must be a list of values.You cannot pass the values as an array reference,
+because this cannot be distinguished from passing one value which itself an array reference.
+
+If a parameter is marked as optional and is not present, it will simply not be returned.
+
+If  you  want to pass in any of the cache control parameters described below, simply pass them
+after the list of parameter validation specs.
+
+    use Mouse;
+    use MouseX::Params::Validate;
+
+    sub foo 
+    {
+        my $self = shift;
+        my ($foo, $bar) = pos_validated_list(
+            \@_,
+            {isa => 'Foo'},
+            {isa => 'Bar'},
+            MX_PARAMS_VALIDATE_NO_CACHE => 1,
+        );
+        ...
+        ...
+    }
+
+=cut
+
+sub pos_validated_list 
+{
+    my ($args) = @_;
+
+    my @spec;
+    push @spec, shift while ref $_[0];
+    my %extra = @_;
+    my $cache_key = _cache_key( \%extra );
+    my $allow_extra = delete $extra{MX_PARAMS_VALIDATE_ALLOW_EXTRA};
+
+    my @pv_spec;
+    if (exists $CACHED_SPECS{$cache_key}) 
+    {
+        (ref($CACHED_SPECS{$cache_key}) eq 'ARRAY')
+        || confess("I was expecting an ARRAY-ref in the cached $cache_key parameter"
+                 . " spec, you are doing something funky, stop it!");
+        @pv_spec = @{$CACHED_SPECS{$cache_key}};
+    }
+    else 
+    {
+        my $should_cache = exists $extra{MX_PARAMS_VALIDATE_NO_CACHE} ? 0 : 1;
+        @pv_spec = map { _convert_to_param_validate_spec($_) } @spec;
+        $CACHED_SPECS{$cache_key} = \@pv_spec if $should_cache;
+    }
+
+    my @args = @$args;
+    $args[$_] = $pv_spec[$_]{constraint}->coerce($args[$_])
+        for grep { $pv_spec[$_] && $pv_spec[$_]{coerce} } 0 .. $#args;
+
+    @args = Params::Validate::validate_with(
+        params      => \@args,
+        spec        => \@pv_spec,
+        allow_extra => $allow_extra,
+        called      => _caller_name(),
+    );
+
+    return @args;
+}
+
+sub _cache_key 
+{
+    my $spec = shift;
+
+    if (exists $spec->{MX_PARAMS_VALIDATE_CACHE_KEY}) 
+    {
+        return delete $spec->{MX_PARAMS_VALIDATE_CACHE_KEY};
+    }
+    else 
+    {
+        return refaddr(caller_cv(2));
+    }
+}
+
+sub _convert_to_param_validate_spec 
+{
+    my $spec = shift;
+    my %pv_spec;
+
+    $pv_spec{optional} = $spec->{optional}
+        if exists $spec->{optional};
+    $pv_spec{default} = $spec->{default}
+        if exists $spec->{default};
+    $pv_spec{coerce} = $spec->{coerce}
+        if exists $spec->{coerce};
+        
+    my $constraint;
+    if (defined $spec->{isa}) 
+    {
+        $constraint = _is_tc($spec->{isa})
+            || Mouse::Util::TypeConstraints::find_or_parse_type_constraint($spec->{isa})
+            || class_type($spec->{isa});
+    }
+    elsif (defined $spec->{does}) 
+    {
+        $constraint = _is_tc($spec->{isa})
+            || find_type_constraint($spec->{does})
+            || role_type($spec->{does});
+    }
+
+    $pv_spec{callbacks} = $spec->{callbacks}
+        if exists $spec->{callbacks};
+
+    if ($constraint) 
+    {
+        $pv_spec{constraint} = $constraint;
+        $pv_spec{callbacks}{'checking type constraint for ' . $constraint->name}
+            = sub { $constraint->check($_[0]) };
+    }
+
+    delete $pv_spec{coerce}
+        unless $pv_spec{constraint} && $pv_spec{constraint}->has_coercion;
+
+    return \%pv_spec;
+}
+
+sub _is_tc 
+{
+    my $maybe_tc = shift;
+
+    return $maybe_tc
+        if defined $maybe_tc
+            && blessed $maybe_tc
+            && $maybe_tc->isa('Mouse::Meta::TypeConstraint');
+}
+
+sub _caller_name 
+{
+    my $depth = shift || 0;
+    return (caller(2 + $depth))[3];
+}
+
+=head1 AUTHOR
+
+Mohammad S Anwar, C<< <mohammad.anwar at yahoo.com> >>
+
+=head1 BUGS
+
+Please report any bugs or feature requests to C<bug-mousex-params-validate at rt.cpan.org>, or
+through the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=MouseX-Params-Validate>.
+I will be notified and then you'll automatically be notified of progress on your bug as I make
+changes.
+
+=head1 SUPPORT
+
+You can find documentation for this module with the perldoc command.
+
+    perldoc MouseX::Params::Validate
+
+You can also look for information at:
+
+=over 4
+
+=item * RT: CPAN's request tracker
+
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=MouseX-Params-Validate>
+
+=item * AnnoCPAN: Annotated CPAN documentation
+
+L<http://annocpan.org/dist/MouseX-Params-Validate>
+
+=item * CPAN Ratings
+
+L<http://cpanratings.perl.org/d/MouseX-Params-Validate>
+
+=item * Search CPAN
+
+L<http://search.cpan.org/dist/MouseX-Params-Validate/>
+
+=back
+
+=head1 ACKNOWLEDGEMENTS
+
+=over 2
+
+=item * Stevan Little <stevan.little@iinteractive.com> (Author of MooseX::Params::Validate).
+
+=item * Dave Rolsky E<lt>autarch@urth.orgE<gt> (Maintainer of MooseX::Params::Validate).
+
+=back
+
+=head1 LICENSE AND COPYRIGHT
+
+Copyright 2011 Mohammad S Anwar.
+
+This  program  is  free  software; you can redistribute it and/or modify it under the terms of
+either:  the  GNU  General Public License as published by the Free Software Foundation; or the
+Artistic License.
+
+See http://dev.perl.org/licenses/ for more information.
+
+=head1 DISCLAIMER
+
+This  program  is  distributed in the hope that it will be useful,  but  WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+=cut
+
+1; # End of MouseX::Params::Validate
