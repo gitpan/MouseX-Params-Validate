@@ -21,7 +21,7 @@ name: MouseX-Params-Validate
 provides:
   MouseX::Params::Validate:
     file: lib/MouseX/Params/Validate.pm
-    version: 0.01
+    version: 0.02
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.01
+version: 0.02
