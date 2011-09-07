@@ -1,5 +1,8 @@
 Revision history for MouseX-Params-Validate
 
+0.03    Wed Sep 07 16:17:18 2011
+        - Minor pod changes.
+
 0.02    Tue Aug 09 13:20:11 2011
         - Prepared the distribution using the Module::Signature v0.68.
 

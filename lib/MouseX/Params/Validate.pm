@@ -16,22 +16,22 @@ use Sub::Exporter -setup =>
 
 =head1 NAME
 
-MouseX::Params::Validate - Extension of Params::Validate using Mouse's types.
+MouseX::Params::Validate - Extension of L<Params::Validate> using Mouse's types.
 
 =head1 VERSION
 
-Version 0.02
+Version 0.03
 
 =cut
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 my %CACHED_SPECS;
 
 =head1 DESCRIPTION
 
 Method parameter validation extension to Mouse. 
 
-Borrowed code entirely from MooseX::Params::Validate and stripped Moose footprints.
+Borrowed code entirely from L<MooseX::Params::Validate> and stripped Moose footprints.
 
 =head1 EXPORTS
 
@@ -55,7 +55,7 @@ method is called and cached for subsequent calls.
 =head1 CACHING
 
 When a validation subroutine is called the first time, the parameter spec is prepared & cached 
-to avoid unnecessary regeneration. It uses the fully qualified name of the subroutine (package 
+to avoid unnecessary regeneration. It uses the fully qualified name of the subroutine (package
 +subname) as the cache key. In 99.999% of the use cases for this module that will be the right 
 thing to do. You can do a couple things to better control the caching behavior.
 
@@ -77,9 +77,9 @@ the normal cache key generation.
 
 =head2 B<validated_hash(\@_, %parameter_spec)>
 
-This behaves  similarly  to the standard Params::Validate C<validate> function and returns the
-captured values in a HASH.  The  one  exception is where if it spots an instance in the C<@_>,
-then it will handle it appropriately.
+This behaves  similarly  to the standard L<Params::Validate> C<validate> function and  returns 
+the captured values in a HASH. The one exception is where if it spots an instance in the C<@_>
+, then it will handle it appropriately.
 
 The values in C<@_> can either be a set of name-value pairs or a single hash reference.
 
@@ -102,8 +102,8 @@ This is the default value to be used if the value is not supplied.
 
 =item I<optional>
 
-As with Params::Validate, all options are considered required unless otherwise specified. This
-option is passed directly to Params::Validate.
+As with L<Params::Validate>,  all  options are considered required unless otherwise specified.
+This option is passed directly to L<Params::Validate>.
 
 =item I<coerce>
 
@@ -249,7 +249,7 @@ sub validated_list
     );
 }
 
-=head2 B<pos_validated_list( \@_, $spec, $spec, ... )>
+=head2 B<pos_validated_list(\@_, $spec, $spec, ...)>
 
 This function validates a list of positional parameters. Each C<$spec>  should validate one of 
 the parameters in the list.
@@ -437,9 +437,9 @@ L<http://search.cpan.org/dist/MouseX-Params-Validate/>
 
 =over 2
 
-=item * Stevan Little <stevan.little@iinteractive.com> (Author of MooseX::Params::Validate).
+=item * Stevan Little <stevan.little@iinteractive.com> (Author of L<MooseX::Params::Validate>).
 
-=item * Dave Rolsky E<lt>autarch@urth.orgE<gt> (Maintainer of MooseX::Params::Validate).
+=item * Dave Rolsky E<lt>autarch@urth.orgE<gt> (Maintainer of L<MooseX::Params::Validate>).
 
 =back
 
