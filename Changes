@@ -1,5 +1,8 @@
 Revision history for MouseX-Params-Validate
 
+0.04    Thu Sep 08 16:17:20 2011
+        - Changed the name slightly.
+
 0.03    Wed Sep 07 16:17:18 2011
         - Minor pod changes.
 

@@ -1,5 +1,5 @@
 ---
-abstract: "Extension of L<Params::Validate> using Mouse's types."
+abstract: "Extension of Params::Validate using Mouse's types."
 author:
   - 'Mohammad S Anwar <mohammad.anwar@yahoo.com>'
 build_requires:
@@ -21,7 +21,7 @@ name: MouseX-Params-Validate
 provides:
   MouseX::Params::Validate:
     file: lib/MouseX/Params/Validate.pm
-    version: 0.03
+    version: 0.04
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.03
+version: 0.04

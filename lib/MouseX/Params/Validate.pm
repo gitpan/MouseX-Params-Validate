@@ -16,15 +16,15 @@ use Sub::Exporter -setup =>
 
 =head1 NAME
 
-MouseX::Params::Validate - Extension of L<Params::Validate> using Mouse's types.
+MouseX::Params::Validate - Extension of Params::Validate using Mouse's types.
 
 =head1 VERSION
 
-Version 0.03
+Version 0.04
 
 =cut
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 my %CACHED_SPECS;
 
 =head1 DESCRIPTION
