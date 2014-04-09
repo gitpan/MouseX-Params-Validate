@@ -8,7 +8,7 @@ use Scalar::Util 'blessed', 'refaddr', 'reftype';
 
 use Mouse::Util::TypeConstraints qw( find_type_constraint class_type role_type );
 use Params::Validate;
-use Sub::Exporter -setup => 
+use Sub::Exporter -setup =>
 {
     exports => [qw( validated_hash validated_list pos_validated_list )],
     groups  => {default => [qw( validated_hash validated_list pos_validated_list )]},
@@ -20,16 +20,16 @@ MouseX::Params::Validate - Extension of Params::Validate using Mouse's types.
 
 =head1 VERSION
 
-Version 0.04
+Version 0.05
 
 =cut
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 my %CACHED_SPECS;
 
 =head1 DESCRIPTION
 
-Method parameter validation extension to Mouse. 
+Method parameter validation extension to Mouse.
 
 Borrowed code entirely from L<MooseX::Params::Validate> and stripped Moose footprints.
 
@@ -54,21 +54,21 @@ method is called and cached for subsequent calls.
 
 =head1 CACHING
 
-When a validation subroutine is called the first time, the parameter spec is prepared & cached 
+When a validation subroutine is called the first time, the parameter spec is prepared & cached
 to avoid unnecessary regeneration. It uses the fully qualified name of the subroutine (package
-+subname) as the cache key. In 99.999% of the use cases for this module that will be the right 
++subname) as the cache key. In 99.999% of the use cases for this module that will be the right
 thing to do. You can do a couple things to better control the caching behavior.
 
 =over 2
 
 =item *
 
-Passing in the C<MX_PARAMS_VALIDATE_NO_CACHE> flag in the parameter spec this will prevent the 
+Passing in the C<MX_PARAMS_VALIDATE_NO_CACHE> flag in the parameter spec this will prevent the
 parameter spec from being cached.
 
 =item *
 
-Passing in C<MX_PARAMS_VALIDATE_CACHE_KEY> with  value to be used as the cache key will bypass 
+Passing in C<MX_PARAMS_VALIDATE_CACHE_KEY> with  value to be used as the cache key will bypass
 the normal cache key generation.
 
 =back
@@ -77,7 +77,7 @@ the normal cache key generation.
 
 =head2 B<validated_hash(\@_, %parameter_spec)>
 
-This behaves  similarly  to the standard L<Params::Validate> C<validate> function and  returns 
+This behaves  similarly  to the standard L<Params::Validate> C<validate> function and  returns
 the captured values in a HASH. The one exception is where if it spots an instance in the C<@_>
 , then it will handle it appropriately.
 
@@ -115,8 +115,8 @@ ignored.
 
     use Mouse;
     use MouseX::Params::Validate;
-    
-    sub foo 
+
+    sub foo
     {
         my ($self, %params) = validated_hash(
             \@_,
@@ -128,21 +128,21 @@ ignored.
 
 =cut
 
-sub validated_hash 
+sub validated_hash
 {
     my ($args, %spec) = @_;
 
     my $cache_key = _cache_key(\%spec);
     my $allow_extra = delete $spec{MX_PARAMS_VALIDATE_ALLOW_EXTRA};
 
-    if (exists $CACHED_SPECS{$cache_key}) 
+    if (exists $CACHED_SPECS{$cache_key})
     {
         (ref($CACHED_SPECS{$cache_key}) eq 'HASH')
         || confess("I was expecting a HASH-ref in the cached $cache_key parameter"
                  . " spec, you are doing something funky, stop it!");
         %spec = %{$CACHED_SPECS{$cache_key}};
     }
-    else 
+    else
     {
         my $should_cache = delete $spec{MX_PARAMS_VALIDATE_NO_CACHE} ? 0 : 1;
         $spec{$_} = _convert_to_param_validate_spec( $spec{$_} )
@@ -187,7 +187,7 @@ handle it appropriately, returning it as the first argument.
     use Mouse;
     use MouseX::Params::Validate;
 
-    sub foo 
+    sub foo
     {
         my ($self, $foo, $bar) = validated_list(
             \@_,
@@ -200,7 +200,7 @@ handle it appropriately, returning it as the first argument.
 
 =cut
 
-sub validated_list 
+sub validated_list
 {
     my ($args, @spec) = @_;
 
@@ -209,7 +209,7 @@ sub validated_list
     my $allow_extra = delete $spec{MX_PARAMS_VALIDATE_ALLOW_EXTRA};
 
     my @ordered_spec;
-    if (exists $CACHED_SPECS{$cache_key}) 
+    if (exists $CACHED_SPECS{$cache_key})
     {
         (ref($CACHED_SPECS{$cache_key}) eq 'ARRAY')
         || confess("I was expecting a ARRAY-ref in the cached $cache_key parameter"
@@ -217,7 +217,7 @@ sub validated_list
         %spec         = %{ $CACHED_SPECS{$cache_key}->[0] };
         @ordered_spec = @{ $CACHED_SPECS{$cache_key}->[1] };
     }
-    else 
+    else
     {
         my $should_cache = delete $spec{MX_PARAMS_VALIDATE_NO_CACHE} ? 0 : 1;
         @ordered_spec = grep { exists $spec{$_} } @spec;
@@ -251,7 +251,7 @@ sub validated_list
 
 =head2 B<pos_validated_list(\@_, $spec, $spec, ...)>
 
-This function validates a list of positional parameters. Each C<$spec>  should validate one of 
+This function validates a list of positional parameters. Each C<$spec>  should validate one of
 the parameters in the list.
 
 Unlike the other  functions,  this function I<cannot> find C<$self> in the argument list. Make
@@ -268,7 +268,7 @@ after the list of parameter validation specs.
     use Mouse;
     use MouseX::Params::Validate;
 
-    sub foo 
+    sub foo
     {
         my $self = shift;
         my ($foo, $bar) = pos_validated_list(
@@ -283,9 +283,9 @@ after the list of parameter validation specs.
 
 =cut
 
-sub pos_validated_list 
+sub pos_validated_list
 {
-    my ($args) = @_;
+    my $args = shift;
 
     my @spec;
     push @spec, shift while ref $_[0];
@@ -294,14 +294,14 @@ sub pos_validated_list
     my $allow_extra = delete $extra{MX_PARAMS_VALIDATE_ALLOW_EXTRA};
 
     my @pv_spec;
-    if (exists $CACHED_SPECS{$cache_key}) 
+    if (exists $CACHED_SPECS{$cache_key})
     {
         (ref($CACHED_SPECS{$cache_key}) eq 'ARRAY')
         || confess("I was expecting an ARRAY-ref in the cached $cache_key parameter"
                  . " spec, you are doing something funky, stop it!");
         @pv_spec = @{$CACHED_SPECS{$cache_key}};
     }
-    else 
+    else
     {
         my $should_cache = exists $extra{MX_PARAMS_VALIDATE_NO_CACHE} ? 0 : 1;
         @pv_spec = map { _convert_to_param_validate_spec($_) } @spec;
@@ -322,21 +322,21 @@ sub pos_validated_list
     return @args;
 }
 
-sub _cache_key 
+sub _cache_key
 {
     my $spec = shift;
 
-    if (exists $spec->{MX_PARAMS_VALIDATE_CACHE_KEY}) 
+    if (exists $spec->{MX_PARAMS_VALIDATE_CACHE_KEY})
     {
         return delete $spec->{MX_PARAMS_VALIDATE_CACHE_KEY};
     }
-    else 
+    else
     {
         return refaddr(caller_cv(2));
     }
 }
 
-sub _convert_to_param_validate_spec 
+sub _convert_to_param_validate_spec
 {
     my $spec = shift;
     my %pv_spec;
@@ -347,15 +347,15 @@ sub _convert_to_param_validate_spec
         if exists $spec->{default};
     $pv_spec{coerce} = $spec->{coerce}
         if exists $spec->{coerce};
-        
+
     my $constraint;
-    if (defined $spec->{isa}) 
+    if (defined $spec->{isa})
     {
         $constraint = _is_tc($spec->{isa})
             || Mouse::Util::TypeConstraints::find_or_parse_type_constraint($spec->{isa})
             || class_type($spec->{isa});
     }
-    elsif (defined $spec->{does}) 
+    elsif (defined $spec->{does})
     {
         $constraint = _is_tc($spec->{isa})
             || find_type_constraint($spec->{does})
@@ -365,7 +365,7 @@ sub _convert_to_param_validate_spec
     $pv_spec{callbacks} = $spec->{callbacks}
         if exists $spec->{callbacks};
 
-    if ($constraint) 
+    if ($constraint)
     {
         $pv_spec{constraint} = $constraint;
         $pv_spec{callbacks}{'checking type constraint for ' . $constraint->name}
@@ -378,7 +378,7 @@ sub _convert_to_param_validate_spec
     return \%pv_spec;
 }
 
-sub _is_tc 
+sub _is_tc
 {
     my $maybe_tc = shift;
 
@@ -388,7 +388,7 @@ sub _is_tc
             && $maybe_tc->isa('Mouse::Meta::TypeConstraint');
 }
 
-sub _caller_name 
+sub _caller_name
 {
     my $depth = shift || 0;
     return (caller(2 + $depth))[3];

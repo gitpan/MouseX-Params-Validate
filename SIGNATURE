@@ -1,5 +1,5 @@
 This file contains message digests of all files listed in MANIFEST,
-signed via the Module::Signature module, version 0.68.
+signed via the Module::Signature module, version 0.73.
 
 To verify the content in this distribution, first make sure you have
 Module::Signature installed, then type:
@@ -15,24 +15,25 @@ not run its Makefile.PL or Build.PL.
 Hash: SHA1
 
 SHA1 4cd092ceaea824ff158910492a869d84a30a0ab4 Build.PL
-SHA1 0679dcbc5d5c89949f8de5fd09572f191203c72d Changes
-SHA1 48b2d93c4aad75e8713e74ceeb9af33a902b7336 MANIFEST
+SHA1 50e09e7b47a350641b305128a83bbbda1e23ac42 Changes
+SHA1 571f7162cb049e60186de05f43c4793460a41c66 MANIFEST
 SHA1 7d20e4e840781030202bb045d5ab81b3fd1b68b0 MANIFEST.SKIP
-SHA1 b5f89b7c3c11656c30b9746e41e46576eac82bcf META.yml
+SHA1 d9054b1334064ad05d573dca9ec3ef5ce16bda74 META.json
+SHA1 0e7d3c04bdfa55ba96da5ebda34f23bb32b6b8fd META.yml
 SHA1 68f182a7d9f149b8409210c0923b692b166b4762 Makefile.PL
 SHA1 ed224f550b51d2147d2145b10d3a33816f80d0a9 README
-SHA1 c157d3f407d0ad7c5753ca420df9c10d895259b0 lib/MouseX/Params/Validate.pm
+SHA1 68ced838560c4f3d5da439d1b37420ebd08c7f84 lib/MouseX/Params/Validate.pm
 SHA1 e7ec0b186774a3aadd2c38855c62460260ab9be1 t/00-load.t
 SHA1 2b8ffb7e4f399af95d092743846ac8d438f2c53e t/manifest.t
 SHA1 0765c9ff0cc4319f415bb08d0053b7717a8284a2 t/pod.t
 -----BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.14 (MingW32)
+Version: GnuPG v1.4.11 (MingW32)
 
-iQEcBAEBAgAGBQJOaN1oAAoJEPYcXBXhRYOhPWgH/1Gclip8PsVa8v6E7l0EQxbw
-F+oejfbMynOmqYAGealau3jeuMEA+TDqigywpUdNnQgYaj8xSXeficSxV/XU1MLr
-ZzU+Ksogb+JD8kIrjyETfw8hFfTYH8HIriMPZcx8HxM/aL7OOfSAMt4WGmCSElSF
-gVD8dcrJGSilrWCiZ5WExu/ols9tqSSLPUZI2lp2LyZ28ZuhJGBHQb20umUJiJQY
-gMTfvuwEOviWWhb+7rj1TuW/IQaRX1DqRR2aIJq5TF1Cyv6kEaanVi5G6EwYJ5VD
-AjdwSIQ03eP2huHRyOfqG3wLE7GifPyYEv4KR8S35x1LOFKLQlG5ySHsN5LOOgo=
-=FvZo
+iQEcBAEBAgAGBQJTREc0AAoJENoXJXWo7C/pCGEH/228ToKQcb8RUVQH25xmoe6K
+gM3KsEuOsyecQ0lnJ7x3dHoAcMHzcBCtxVc0zU2+2wjMw0felfGJzqLLrd0Vu4PM
+1M5EL/3HBdR+cFFx8r0Sndq6HRT2MyXTsLHCKQSx5mNnSl88wd6h11xf0cIw+OYz
+c7Z5CKweiQW/1vS03IS9eLgWyZ8uJ4m2yyHR1nvx1La+Bjd3eYiYYVCXfbyryZbK
++bhZ/vqLf4D82oHu22ZKKtZ5XqL+aUu4ipQ4NxRazaLySeKlhbi6bL4KH31oDXfn
+V5C0zwbquX6TYC8WRG7bLEqtkYpFnY6qEnYX9DidFqU6tmTxbo8YkvyJZRjOwx8=
+=yAEz
 -----END PGP SIGNATURE-----

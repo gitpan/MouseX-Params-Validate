@@ -1,5 +1,8 @@
 Revision history for MouseX-Params-Validate
 
+0.05    Tue Apr 08 19:34:19 2014
+        - Patched RT #94389
+
 0.04    Thu Sep 08 16:17:20 2011
         - Changed the name slightly.
 
