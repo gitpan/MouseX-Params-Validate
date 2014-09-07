@@ -1,5 +1,12 @@
 Revision history for MouseX-Params-Validate
 
+0.06    Sun Sep 07 10:53:20 2014
+        - Patched RT #98668
+        - Added section 'REPOSITORY' to the pod documentation.
+        - Added section 'CONTRIBUTORS' to the pod documentation.
+        - Added key "META_MERGE" to Makefile.PL file.
+        - Removed Build.PL file.
+
 0.05    Tue Apr 08 19:34:19 2014
         - Patched RT #94389
 

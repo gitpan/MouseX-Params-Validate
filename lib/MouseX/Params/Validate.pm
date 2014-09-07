@@ -1,5 +1,8 @@
 package MouseX::Params::Validate;
 
+$MouseX::Params::Validate::VERSION = '0.06';
+
+use 5.006;
 use strict; use warnings;
 
 use Carp 'confess';
@@ -20,11 +23,10 @@ MouseX::Params::Validate - Extension of Params::Validate using Mouse's types.
 
 =head1 VERSION
 
-Version 0.05
+Version 0.06
 
 =cut
 
-our $VERSION = '0.05';
 my %CACHED_SPECS;
 
 =head1 DESCRIPTION
@@ -49,27 +51,28 @@ By default, this module exports the following:
 
 =head1 CAVEATS
 
-It isn't possible to introspect the method parameter specs they are created as needed when the
-method is called and cached for subsequent calls.
+It  isn't  possible  to introspect the method parameter specs they are created as
+needed when the method is called and cached for subsequent calls.
 
 =head1 CACHING
 
-When a validation subroutine is called the first time, the parameter spec is prepared & cached
-to avoid unnecessary regeneration. It uses the fully qualified name of the subroutine (package
-+subname) as the cache key. In 99.999% of the use cases for this module that will be the right
-thing to do. You can do a couple things to better control the caching behavior.
+When  a  validation  subroutine  is  called the first time, the parameter spec is
+prepared  & cached to avoid unnecessary regeneration. It uses the fully qualified
+name of the subroutine (package +subname) as the cache key. In 99.999% of the use
+cases  for  this  module  that will be the right thing to do. You can do a couple
+things to better control the caching behavior.
 
 =over 2
 
 =item *
 
-Passing in the C<MX_PARAMS_VALIDATE_NO_CACHE> flag in the parameter spec this will prevent the
-parameter spec from being cached.
+Passing in the C<MX_PARAMS_VALIDATE_NO_CACHE> flag in the parameter spec this will
+prevent the parameter spec from being cached.
 
 =item *
 
-Passing in C<MX_PARAMS_VALIDATE_CACHE_KEY> with  value to be used as the cache key will bypass
-the normal cache key generation.
+Passing in C<MX_PARAMS_VALIDATE_CACHE_KEY> with value to be used as the cache key
+will bypass the normal cache key generation.
 
 =back
 
@@ -77,11 +80,12 @@ the normal cache key generation.
 
 =head2 B<validated_hash(\@_, %parameter_spec)>
 
-This behaves  similarly  to the standard L<Params::Validate> C<validate> function and  returns
-the captured values in a HASH. The one exception is where if it spots an instance in the C<@_>
-, then it will handle it appropriately.
+This behaves  similarly  to the standard L<Params::Validate> C<validate> function
+and returns the captured values in a HASH. The one exception is where if it spots
+an instance in the C<@_> ,then it will handle it appropriately.
 
-The values in C<@_> can either be a set of name-value pairs or a single hash reference.
+The  values  in  C<@_> can  either  be a set of name-value pairs or a single hash
+reference.
 
 The C<%parameter_spec> accepts the following options:
 
@@ -89,8 +93,8 @@ The C<%parameter_spec> accepts the following options:
 
 =item I<isa>
 
-The C<isa> option can be either; class name,  Mouse type constraint name or an anon Mouse type
-constraint.
+The C<isa> option can be either;class name, Mouse type constraint name or an anon
+Mouse type constraint.
 
 =item I<does>
 
@@ -102,14 +106,14 @@ This is the default value to be used if the value is not supplied.
 
 =item I<optional>
 
-As with L<Params::Validate>,  all  options are considered required unless otherwise specified.
-This option is passed directly to L<Params::Validate>.
+As with L<Params::Validate>, all options are considered required unless otherwise
+specified. This option is passed directly to L<Params::Validate>.
 
 =item I<coerce>
 
-If this is true and the parameter has a type constraint which has coercions, then the coercion
-will  be  called  for  this parameter. If the type does have coercions, then this parameter is
-ignored.
+If this is true and the parameter has a type constraint which has coercions, then
+the coercion will  be  called for this parameter.If the type does have coercions,
+then this parameter is ignored.
 
 =back
 
@@ -173,16 +177,18 @@ sub validated_hash
 
 =head2 B<validated_list(\@_, %parameter_spec)>
 
-The C<%parameter_spec> accepts the same options as above but returns the params as  positional
-values instead of a HASH.
+The  C<%parameter_spec> accepts  the same options as above but returns the params
+as positional values instead of a HASH.
 
-We capture the order in which you defined the parameters and then return them as a list in the
-same order. If a param is marked optional and not included, then it will be set to C<undef>.
+We  capture the order in which you defined the parameters and then return them as
+a list  in the same order.If a param is marked optional and not included, then it
+will be set to C<undef>.
 
-The values in C<@_> can either be a set of name-value pairs or a single hash reference.
+The  values  in C<@_>  can  either  be a set of name-value pairs or a single hash
+reference.
 
-Like C<validated_hash>, if it spots an object instance as the first parameter of C<@_> it will
-handle it appropriately, returning it as the first argument.
+Like  C<validated_hash>, if it spots an object instance as the first parameter of
+C<@_> it will handle it appropriately, returning it as the first argument.
 
     use Mouse;
     use MouseX::Params::Validate;
@@ -251,19 +257,21 @@ sub validated_list
 
 =head2 B<pos_validated_list(\@_, $spec, $spec, ...)>
 
-This function validates a list of positional parameters. Each C<$spec>  should validate one of
-the parameters in the list.
+This function validates a  list  of  positional parameters. Each C<$spec>  should
+validate one of the parameters in the list.
 
-Unlike the other  functions,  this function I<cannot> find C<$self> in the argument list. Make
-sure to shift it off yourself before doing validation.
+Unlike the other functions, this function I<cannot> find C<$self> in the argument
+list. Make sure to shift it off yourself before doing validation.
 
-The values in C<@_> must be a list of values.You cannot pass the values as an array reference,
-because this cannot be distinguished from passing one value which itself an array reference.
+The  values  in C<@_>  must be a list of values. You cannot pass the values as an
+array reference,because this cannot be distinguished from passing one value which
+itself an array reference.
 
-If a parameter is marked as optional and is not present, it will simply not be returned.
+If  a  parameter  is marked as optional and is not present, it will simply not be
+returned.
 
-If  you  want to pass in any of the cache control parameters described below, simply pass them
-after the list of parameter validation specs.
+If  you  want to pass in  any  of  the  cache control parameters described below,
+simply pass them after the list of parameter validation specs.
 
     use Mouse;
     use MouseX::Params::Validate;
@@ -347,6 +355,8 @@ sub _convert_to_param_validate_spec
         if exists $spec->{default};
     $pv_spec{coerce} = $spec->{coerce}
         if exists $spec->{coerce};
+    $pv_spec{depends} = $spec->{depends}
+        if exists $spec->{depends};
 
     my $constraint;
     if (defined $spec->{isa})
@@ -398,12 +408,20 @@ sub _caller_name
 
 Mohammad S Anwar, C<< <mohammad.anwar at yahoo.com> >>
 
+=head1 REPOSITORY
+
+L<https://github.com/Manwar/MouseX-Params-Validate>
+
+=head1 CONTRIBUTORS
+
+Hans Staugaard (STAUGAARD)
+
 =head1 BUGS
 
-Please report any bugs or feature requests to C<bug-mousex-params-validate at rt.cpan.org>, or
-through the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=MouseX-Params-Validate>.
-I will be notified and then you'll automatically be notified of progress on your bug as I make
-changes.
+Please  report  any  bugs  or feature requests to C<bug-mousex-params-validate at
+rt.cpan.org>, or through the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=MouseX-Params-Validate>.
+I  will be notified and then you'll automatically be notified of progress on your
+bug as I make changes.
 
 =head1 SUPPORT
 
@@ -445,18 +463,41 @@ L<http://search.cpan.org/dist/MouseX-Params-Validate/>
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright 2011 Mohammad S Anwar.
+Copyright (C) 2011 Mohammad S Anwar.
 
-This  program  is  free  software; you can redistribute it and/or modify it under the terms of
-either:  the  GNU  General Public License as published by the Free Software Foundation; or the
-Artistic License.
+This  program  is  free software; you can redistribute it and/or modify it under
+the  terms  of the the Artistic License (2.0). You may obtain a copy of the full
+license at:
 
-See http://dev.perl.org/licenses/ for more information.
+L<http://www.perlfoundation.org/artistic_license_2_0>
 
-=head1 DISCLAIMER
+Any  use,  modification, and distribution of the Standard or Modified Versions is
+governed by this Artistic License.By using, modifying or distributing the Package,
+you accept this license. Do not use, modify, or distribute the Package, if you do
+not accept this license.
 
-This  program  is  distributed in the hope that it will be useful,  but  WITHOUT ANY WARRANTY;
-without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+If your Modified Version has been derived from a Modified Version made by someone
+other than you,you are nevertheless required to ensure that your Modified Version
+ complies with the requirements of this license.
+
+This  license  does  not grant you the right to use any trademark,  service mark,
+tradename, or logo of the Copyright Holder.
+
+This license includes the non-exclusive, worldwide, free-of-charge patent license
+to make,  have made, use,  offer to sell, sell, import and otherwise transfer the
+Package with respect to any patent claims licensable by the Copyright Holder that
+are  necessarily  infringed  by  the  Package. If you institute patent litigation
+(including  a  cross-claim  or  counterclaim) against any party alleging that the
+Package constitutes direct or contributory patent infringement,then this Artistic
+License to you shall terminate on the date that such litigation is filed.
+
+Disclaimer  of  Warranty:  THE  PACKAGE  IS  PROVIDED BY THE COPYRIGHT HOLDER AND
+CONTRIBUTORS  "AS IS'  AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES. THE IMPLIED
+WARRANTIES    OF   MERCHANTABILITY,   FITNESS   FOR   A   PARTICULAR  PURPOSE, OR
+NON-INFRINGEMENT ARE DISCLAIMED TO THE EXTENT PERMITTED BY YOUR LOCAL LAW. UNLESS
+REQUIRED BY LAW, NO COPYRIGHT HOLDER OR CONTRIBUTOR WILL BE LIABLE FOR ANY DIRECT,
+INDIRECT, INCIDENTAL,  OR CONSEQUENTIAL DAMAGES ARISING IN ANY WAY OUT OF THE USE
+OF THE PACKAGE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =cut
 

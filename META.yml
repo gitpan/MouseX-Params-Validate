@@ -2,27 +2,18 @@
 abstract: "Extension of Params::Validate using Mouse's types."
 author:
   - 'Mohammad S Anwar <mohammad.anwar@yahoo.com>'
-build_requires:
-  Carp: 0
-  Devel::Caller: 0
-  Mouse: 0.93
-  Params::Validate: 0.88
-  Scalar::Util: 0
-  Sub::Exporter: 0
-  Test::More: 0
-configure_requires:
-  Module::Build: 0.40
+build_requires: {}
 dynamic_config: 1
-generated_by: 'Module::Build version 0.4003, CPAN::Meta::Converter version 2.120921'
-license: perl
+generated_by: 'ExtUtils::MakeMaker version 6.66, CPAN::Meta::Converter version 2.141520'
+license: artistic_2
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
-  version: 1.4
+  version: '1.4'
 name: MouseX-Params-Validate
-provides:
-  MouseX::Params::Validate:
-    file: lib/MouseX/Params/Validate.pm
-    version: 0.05
+no_index:
+  directory:
+    - t
+    - inc
 resources:
-  license: http://dev.perl.org/licenses/
-version: 0.05
+  repository: https://github.com/Manwar/MouseX-Params-Validate.git
+version: '0.06'
