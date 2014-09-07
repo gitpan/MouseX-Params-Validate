@@ -16,4 +16,4 @@ no_index:
     - inc
 resources:
   repository: https://github.com/Manwar/MouseX-Params-Validate.git
-version: '0.06'
+version: '0.07'

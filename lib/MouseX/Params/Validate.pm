@@ -1,6 +1,6 @@
 package MouseX::Params::Validate;
 
-$MouseX::Params::Validate::VERSION = '0.06';
+$MouseX::Params::Validate::VERSION = '0.07';
 
 use 5.006;
 use strict; use warnings;
@@ -23,7 +23,7 @@ MouseX::Params::Validate - Extension of Params::Validate using Mouse's types.
 
 =head1 VERSION
 
-Version 0.06
+Version 0.07
 
 =cut
 
@@ -463,7 +463,7 @@ L<http://search.cpan.org/dist/MouseX-Params-Validate/>
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright (C) 2011 Mohammad S Anwar.
+Copyright (C) 2011-14 Mohammad S Anwar.
 
 This  program  is  free software; you can redistribute it and/or modify it under
 the  terms  of the the Artistic License (2.0). You may obtain a copy of the full

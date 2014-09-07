@@ -1,5 +1,8 @@
 Revision history for MouseX-Params-Validate
 
+0.07    Sun Sep 07 22:52:10 2014
+        - Updated Copyright year details.
+
 0.06    Sun Sep 07 10:53:20 2014
         - Patched RT #98668
         - Added section 'REPOSITORY' to the pod documentation.
